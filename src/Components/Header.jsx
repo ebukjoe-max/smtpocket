@@ -14,9 +14,9 @@ export default function Header () {
   const NAV_LINKS = [
     { label: 'Investment', href: '/plans' },
     { label: 'Loans', href: '/Loans' },
-    { label: 'Trading Bot', href: '/Trading Bot' },
+    // { label: 'Trading Bot', href: '/Trading Bot' },
     { label: 'Token', href: '/token' },
-    { label: 'Docs', href: '/docs' },
+    // { label: 'Docs', href: '/docs' },
     { label: 'Contact', href: '/contact' }
   ]
 
