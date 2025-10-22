@@ -3,14 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Header from '../../Components/Header.jsx'
 
-/*
-  Updated:
-  - Dynamic coin list (COINS array). URL built from array so it's easy to add/remove tokens.
-  - useLivePrices returns a mapping keyed by coin id so rendering is dynamic.
-  - Right card now renders a scrollable coin list instead of a few hard-coded rows.
-  - AnimatedNumber preserved for nice UI feel.
-*/
-
 const COINS = [
   { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin' },
   { id: 'ethereum', symbol: 'ETH', name: 'Ethereum' },
