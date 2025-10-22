@@ -3,6 +3,14 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 
+/*
+  Header changes:
+  - Expanded NAV_LINKS for a full investment/token platform.
+  - Mobile dropdown click behavior fixed: links close the menu when tapped.
+  - The mobile dropdown CSS no longer disables pointer-events by default, so links are clickable.
+  - Kept classnames 'header' and 'mobileDropdown' unchanged per request.
+*/
+
 export default function Header () {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -12,27 +20,27 @@ export default function Header () {
   }, [menuOpen])
 
   const NAV_LINKS = [
+    { label: 'Airdrop', href: '/auth/Login' },
     { label: 'Investment', href: '/plans' },
+    // { label: 'Staking', href: '/staking' },
     { label: 'Loans', href: '/Loans' },
-    // { label: 'Trading Bot', href: '/Trading Bot' },
-    { label: 'Token', href: '/token' },
+    // { label: 'Launchpad', href: '/launchpad' },
+    // { label: 'Token', href: '/token' },
     // { label: 'Docs', href: '/docs' },
-    { label: 'Contact', href: '/contact' }
+    { label: 'Support', href: 'mailto:support@smtpocket.com' }
   ]
 
   return (
-    <header className='header'>
-      {/* Logo */}
+    <header className='header' role='banner'>
       <div>
-        <a href='/' className='logoWrap'>
+        <a href='/' className='logoWrap' aria-label='Smart Pocket home'>
           <div className='logo'>Smart Pocket</div>
           <div className='tag'>Wallet & Exchange</div>
         </a>
       </div>
 
-      {/* Desktop Nav */}
-      <div className='desktopNav'>
-        <nav className='nav'>
+      <div className='desktopNav' aria-hidden={false}>
+        <nav className='nav' role='navigation' aria-label='Main navigation'>
           <ul>
             {NAV_LINKS.map(link => (
               <li key={link.href}>
@@ -52,16 +60,16 @@ export default function Header () {
           </ul>
         </nav>
       </div>
-      {/* Mobile Menu Toggle */}
+
       <button
         className='hamburger'
         aria-label='Toggle menu'
+        aria-expanded={menuOpen}
         onClick={() => setMenuOpen(!menuOpen)}
       >
         {menuOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
-      {/* Mobile Overlay + Dropdown */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -74,10 +82,10 @@ export default function Header () {
             />
             <motion.nav
               className='mobileDropdown'
-              initial={{ y: -40, opacity: 0 }}
+              initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -40, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              exit={{ y: -20, opacity: 0 }}
+              transition={{ duration: 0.26 }}
             >
               <ul>
                 {NAV_LINKS.map(link => (
@@ -88,10 +96,17 @@ export default function Header () {
                   </li>
                 ))}
                 <li>
-                  <a href='/auth/Login'>Login</a>
+                  <a href='/auth/Login' onClick={() => setMenuOpen(false)}>
+                    Login
+                  </a>
                 </li>
                 <li>
-                  <a href='/auth/RegistrationPage'>Register</a>
+                  <a
+                    href='/auth/RegistrationPage'
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Register
+                  </a>
                 </li>
               </ul>
             </motion.nav>

@@ -1,65 +1,78 @@
 'use client'
-import React, { useEffect, useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Header from '../Header'
+import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import Header from '../../Components/Header.jsx'
 
-const COINGECKO_URL =
-  'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,binancecoin,xrp,dogecoin&vs_currencies=usd&include_24hr_change=true'
+/*
+  Updated:
+  - Dynamic coin list (COINS array). URL built from array so it's easy to add/remove tokens.
+  - useLivePrices returns a mapping keyed by coin id so rendering is dynamic.
+  - Right card now renders a scrollable coin list instead of a few hard-coded rows.
+  - AnimatedNumber preserved for nice UI feel.
+*/
 
-function useLivePrices (intervalMs = 10000) {
+const COINS = [
+  { id: 'bitcoin', symbol: 'BTC', name: 'Bitcoin' },
+  { id: 'ethereum', symbol: 'ETH', name: 'Ethereum' },
+  { id: 'solana', symbol: 'SOL', name: 'Solana' },
+  { id: 'cardano', symbol: 'ADA', name: 'Cardano' },
+  { id: 'binancecoin', symbol: 'BNB', name: 'BNB' },
+  { id: 'ripple', symbol: 'XRP', name: 'XRP' },
+  { id: 'dogecoin', symbol: 'DOGE', name: 'Dogecoin' },
+  { id: 'polkadot', symbol: 'DOT', name: 'Polkadot' },
+  { id: 'litecoin', symbol: 'LTC', name: 'Litecoin' },
+  { id: 'chainlink', symbol: 'LINK', name: 'Chainlink' },
+  { id: 'avalanche-2', symbol: 'AVAX', name: 'Avalanche' },
+  { id: 'tron', symbol: 'TRX', name: 'Tron' },
+  { id: 'stellar', symbol: 'XLM', name: 'Stellar' },
+  { id: 'vechain', symbol: 'VET', name: 'VeChain' },
+  { id: 'cosmos', symbol: 'ATOM', name: 'Cosmos' },
+  { id: 'near', symbol: 'NEAR', name: 'NEAR' },
+  { id: 'algorand', symbol: 'ALGO', name: 'Algorand' },
+  { id: 'fantom', symbol: 'FTM', name: 'Fantom' },
+  { id: 'tezos', symbol: 'XTZ', name: 'Tezos' },
+  { id: 'filecoin', symbol: 'FIL', name: 'Filecoin' }
+]
+
+function buildUrl (ids) {
+  const qs = new URLSearchParams({
+    vs_currencies: 'usd',
+    include_24hr_change: 'true'
+  })
+  return `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(
+    ','
+  )}&${qs.toString()}`
+}
+
+function useLivePrices (intervalMs = 15000) {
   const [prices, setPrices] = useState({
-    btc: null,
-    eth: null,
-    sol: null,
-    ada: null,
-    bnb: null,
-    xrp: null,
-    doge: null,
+    data: {},
     fetchedAt: null,
     error: null
   })
 
   useEffect(() => {
     let mounted = true
+    const ids = COINS.map(c => c.id)
+    const url = buildUrl(ids)
 
     async function fetchPrices () {
       try {
-        const res = await fetch(COINGECKO_URL)
+        const res = await fetch(url)
         const json = await res.json()
         if (!mounted) return
 
-        setPrices({
-          btc: {
-            usd: json.bitcoin?.usd ?? null,
-            change24h: json.bitcoin?.usd_24h_change ?? null
-          },
-          eth: {
-            usd: json.ethereum?.usd ?? null,
-            change24h: json.ethereum?.usd_24h_change ?? null
-          },
-          sol: {
-            usd: json.solana?.usd ?? null,
-            change24h: json.solana?.usd_24h_change ?? null
-          },
-          ada: {
-            usd: json.cardano?.usd ?? null,
-            change24h: json.cardano?.usd_24h_change ?? null
-          },
-          bnb: {
-            usd: json.binancecoin?.usd ?? null,
-            change24h: json.binancecoin?.usd_24h_change ?? null
-          },
-          xrp: {
-            usd: json.xrp?.usd ?? null,
-            change24h: json.xrp?.usd_24h_change ?? null
-          },
-          doge: {
-            usd: json.dogecoin?.usd ?? null,
-            change24h: json.dogecoin?.usd_24h_change ?? null
-          },
-          fetchedAt: Date.now(),
-          error: null
-        })
+        // map raw response to normalized object
+        const map = {}
+        for (const c of COINS) {
+          const j = json[c.id] || {}
+          map[c.id] = {
+            usd: j.usd ?? null,
+            change24h: j.usd_24h_change ?? null
+          }
+        }
+
+        setPrices({ data: map, fetchedAt: Date.now(), error: null })
       } catch (err) {
         if (!mounted) return
         setPrices(prev => ({ ...prev, error: err.message }))
@@ -75,6 +88,37 @@ function useLivePrices (intervalMs = 10000) {
   }, [intervalMs])
 
   return prices
+}
+
+function AnimatedNumber ({ value, decimals = 0, prefix = '', className = '' }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    let raf = null
+    const start = performance.now()
+    const from = display
+    const to = Number(value) || 0
+    const duration = 700
+    function step (t) {
+      const d = Math.min(1, (t - start) / duration)
+      const eased = 1 - Math.pow(1 - d, 3)
+      const cur = from + (to - from) * eased
+      setDisplay(cur)
+      if (d < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  return (
+    <span className={className}>
+      {prefix}
+      {Number(display).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      })}
+    </span>
+  )
 }
 
 export default function AdvancedCryptoHero () {
@@ -97,7 +141,7 @@ export default function AdvancedCryptoHero () {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' })
       setNetwork(chainId)
       setConnected(true)
-      // basic listener
+      // listeners
       window.ethereum.on &&
         window.ethereum.on('accountsChanged', accts => {
           setAccount(accts[0] || null)
@@ -111,61 +155,22 @@ export default function AdvancedCryptoHero () {
   }
 
   function disconnectWallet () {
-    // For MetaMask there's no programmatic disconnect — we simply clear state
     setConnected(false)
     setAccount(null)
     setNetwork(null)
   }
 
-  // animated counters helper (simple)
-  function AnimatedNumber ({
-    value,
-    decimals = 0,
-    prefix = '',
-    className = ''
-  }) {
-    const [display, setDisplay] = useState(0)
-    useEffect(() => {
-      let raf = null
-      const start = performance.now()
-      const from = display
-      const to = Number(value) || 0
-      const duration = 700
-      function step (t) {
-        const d = Math.min(1, (t - start) / duration)
-        const eased = 1 - Math.pow(1 - d, 3)
-        const cur = from + (to - from) * eased
-        setDisplay(cur)
-        if (d < 1) raf = requestAnimationFrame(step)
-      }
-      raf = requestAnimationFrame(step)
-      return () => cancelAnimationFrame(raf)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value])
-    return (
-      <span className={className}>
-        {prefix}
-        {Number(display).toLocaleString(undefined, {
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals
-        })}
-      </span>
-    )
-  }
-
   return (
     <div className='root'>
-      {/* particles canvas */}
-
       <video autoPlay loop muted playsInline className='bg-video'>
         <source
           src='https://cdn.pixabay.com/video/2025/06/27/288182_large.mp4'
           type='video/mp4'
         />
       </video>
-      {/* Header nav */}
+
       <Header />
-      {/* hero content */}
+
       <main className='hero'>
         <section className='left'>
           <motion.h1
@@ -174,10 +179,9 @@ export default function AdvancedCryptoHero () {
             transition={{ delay: 0.1, duration: 0.8 }}
             className='title'
           >
-            Smart Pocket
-            {/* <br /> */}
-            {/* <span className='gradient'>Crypto Platform</span> */}
+            Smart Pocket <span className='gradient'>Investment & Airdrop </span>
           </motion.h1>
+
           <motion.p
             className='lead'
             initial={{ y: 20, opacity: 0 }}
@@ -232,34 +236,6 @@ export default function AdvancedCryptoHero () {
               </div>
             </div>
           </motion.div>
-          <motion.div
-            className='featureGrid'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className='feature'>
-              <div className='fIcon'>🔒</div>
-              <div>
-                <div className='fTitle'>Profitable Trading Bot</div>
-                <div className='fDesc'>Multi-sig & hardware support.</div>
-              </div>
-            </div>
-            <div className='feature'>
-              <div className='fIcon'>⚡</div>
-              <div>
-                <div className='fTitle'>Investment</div>
-                <div className='fDesc'>Layer-2 support & MEV protection.</div>
-              </div>
-            </div>
-            <div className='feature'>
-              <div className='fIcon'>🌐</div>
-              <div>
-                <div className='fTitle'>Crypto Loans</div>
-                <div className='fDesc'>Bridges with fraud proofs.</div>
-              </div>
-            </div>
-          </motion.div>
         </section>
 
         <section className='right'>
@@ -281,192 +257,60 @@ export default function AdvancedCryptoHero () {
                   value={7488223}
                   decimals={0}
                   className='kpiNum'
-                  prefix=''
                 />
                 <div className='kpiLabel'>Users</div>
               </div>
             </div>
 
             <div className='liveChart'>
-              {/* placeholder animated mini chart: CSS gradient + moving overlay */}
               <div className='miniChart' aria-hidden>
                 <div className='miniChartShimmer' />
               </div>
 
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>BTC / USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.btc?.usd ?? 67800}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.btc?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.btc?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
-              </div>
+              <div className='coinList' role='list'>
+                {COINS.map(c => {
+                  const item = prices.data[c.id] || {}
+                  const usd = item.usd ?? 0
+                  const change = item.change24h ?? 0
+                  return (
+                    <div className='coinRow' key={c.id} role='listitem'>
+                      <div className='coinLabel'>
+                        <div className='coinAvatar' aria-hidden>
+                          {c.symbol}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 800 }}>{c.name}</div>
+                          <div
+                            style={{
+                              fontSize: '0.8rem',
+                              color: 'var(--muted)'
+                            }}
+                          >
+                            {c.symbol}
+                          </div>
+                        </div>
+                      </div>
 
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>ETH / USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.eth?.usd ?? 1700}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.eth?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.eth?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
-              </div>
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>SOL / USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.sol?.usd ?? 1700}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.sol?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.sol?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
-              </div>
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>ADA / USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.ada?.usd ?? 1700}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.ada?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.ada?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
-              </div>
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>BNB/ USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.bnb?.usd ?? 1700}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.bnb?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.bnb?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
-              </div>
-              <div className='marketRow'>
-                <div>
-                  <div className='sym'>THXM / USDT</div>
-                  <div className='priceWrap'>
-                    <AnimatedNumber
-                      value={prices.xrp?.usd ?? 1.05}
-                      decimals={0}
-                      prefix='$'
-                      className='priceBig'
-                    />
-                    <small
-                      className='pct'
-                      style={{
-                        color:
-                          (prices.xrp?.change24h ?? 0) >= 0
-                            ? '#16c784'
-                            : '#ff6b6b'
-                      }}
-                    >
-                      {(prices.doge?.change24h ?? 0).toFixed(2)}%
-                    </small>
-                  </div>
-                </div>
-                <div>
-                  <a href='/auth/Login' className='ghost'>
-                    Trade
-                  </a>
-                </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontWeight: 800 }}>
+                          <AnimatedNumber
+                            value={usd || 0}
+                            decimals={2}
+                            prefix='$'
+                          />
+                        </div>
+                        <small
+                          style={{
+                            color: change >= 0 ? '#16c784' : '#ff6b6b',
+                            fontWeight: 700
+                          }}
+                        >
+                          {Number(change ?? 0).toFixed(2)}%
+                        </small>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -476,7 +320,7 @@ export default function AdvancedCryptoHero () {
               </div>
               <div className='footerActions'>
                 <button className='primary' onClick={connectWallet}>
-                  {connected ? 'Open Wallet' : 'Connect '}
+                  {connected ? 'Open Wallet' : 'Connect'}
                 </button>
                 <button
                   className='ghost'
@@ -489,7 +333,6 @@ export default function AdvancedCryptoHero () {
           </motion.div>
         </section>
       </main>
-      {/* optional CTAs / footer micro */}
     </div>
   )
 }
