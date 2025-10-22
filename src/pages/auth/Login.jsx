@@ -15,7 +15,7 @@ export default function Login () {
 
   const handleLogin = async e => {
     e.preventDefault()
-
+    console.log(process.env.NEXT_PUBLIC_API_URL)
     if (!email.trim() || !password.trim()) {
       toast.error('Please fill in all fields')
       return
