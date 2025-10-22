@@ -11,9 +11,6 @@ class MyDocument extends Document {
           <meta name='theme-color' content='#000000' />
 
           {/* Primary SEO Meta */}
-          <title>
-            Smart Pocket | Trusted Investment, Loan & Savings Company
-          </title>
           <meta
             name='title'
             content='Smart Pocket | Trusted Investment, Loan & Savings Company'
@@ -46,7 +43,7 @@ class MyDocument extends Document {
 
           {/* Twitter Meta */}
           <meta name='twitter:card' content='summary_large_image' />
-          <meta name='twitter:url' content='https://www.smartpocket.com/' />
+          <meta name='twitter:url' content='https://www.smtpocket.com/' />
           <meta
             name='twitter:title'
             content='Smart Pocket | Trusted Investment, Loan & Savings Company'
@@ -86,7 +83,7 @@ class MyDocument extends Document {
                 '@context': 'https://schema.org',
                 '@type': 'FinancialService',
                 name: 'Smart Pocket',
-                url: 'https://www.smartpocket.com',
+                url: 'https://www.smtpocket.com',
                 logo: 'https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png',
                 description:
                   'Smart Pocket provides secure investment, flexible loan, and savings services designed to help individuals and businesses grow wealth confidently.',
