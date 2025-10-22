@@ -16,7 +16,7 @@ class MyDocument extends Document {
           {/* Favicon */}
           <link
             rel='icon'
-            href='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+            href='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
           />
 
           {/* Google Fonts Example */}

@@ -87,7 +87,7 @@ export default function ProfilePage () {
         <div className='profile-card'>
           <div className='profile-avatar'>
             <Image
-              src='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+              src='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
               alt='User Avatar'
               width={150}
               height={100}

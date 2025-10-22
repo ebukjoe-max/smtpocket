@@ -42,7 +42,7 @@ export default function ChatBot () {
           <div className='chat-header'>
             <div className='chat-header-info'>
               <img
-                src='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+                src='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
                 alt='logo'
                 className='chat-logo'
               />

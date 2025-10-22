@@ -109,14 +109,14 @@ export default function ForgotPasswordPage () {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link
           rel='icon'
-          href='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+          href='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
         />
       </Head>
 
       <ToastContainer />
       <div className='login__container'>
         <Image
-          src='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+          src='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
           alt='logo'
           className='login__img'
           width={50}

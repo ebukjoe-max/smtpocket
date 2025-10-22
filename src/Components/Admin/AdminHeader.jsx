@@ -295,7 +295,7 @@ export default function AdminHeader () {
       <header className='dashboard-header'>
         <div className='logo-section'>
           <img
-            src='https://i.postimg.cc/V6f00jhs/Crypt-Logo-Retina.webp'
+            src='https://res.cloudinary.com/da26wgev2/image/upload/v1761134034/receipts/bmnhjzee3cynfi5w3djz.png'
             alt='company logo'
             className='brand-name'
           />
