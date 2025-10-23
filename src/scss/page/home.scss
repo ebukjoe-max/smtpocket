@@ -2,13 +2,12 @@
   /* Base colors */
   --bg-1: #0b1220;
   --bg-2: #0f1724;
-  --bg: linear-gradient(180deg, var(--bg-1), var(--bg-2));
-  --accent-start: #ffab00;
-  --accent-end: #ff4b00;
+  --accent-start: rgb(40, 116, 252);
+  --accent-end: rgb(2, 3, 129);
   --accent-gradient: linear-gradient(
-    90deg,
-    var(--accent-start),
-    var(--accent-end)
+    135deg,
+    rgb(2, 3, 129) 0%,
+    rgb(40, 116, 252) 100%
   );
   --accent-2: #4ca1af; /* optional secondary accent */
   --glass: rgba(255, 255, 255, 0.03);
